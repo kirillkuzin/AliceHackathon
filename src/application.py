@@ -5,6 +5,7 @@ from aioalice import Dispatcher, get_new_configured_app
 from aioalice.dispatcher import MemoryStorage
 
 from states import UserStates, DosStates, PingStates
+import meta
 
 
 WEBHOOK_URL_PATH = '/my-alice-webhook/'
@@ -20,8 +21,7 @@ async def handle_new_session(alice_request):
     user_id = alice_request.session.user_id
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     return alice_request.response('Привет! Что будем делать ?',
-                                  buttons=['Атаковать',
-                                           'Пинг'])
+                                  buttons=meta.action_buttons)
 
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
@@ -39,7 +39,7 @@ async def handle_start_attack(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
     proc = subprocess.Popen(
-        ['python', './src/slowloris.py', request_text]
+        ['python', './src/test_http.py', request_text]
     )
     await dp.storage.update_data(user_id=user_id,
                                  data={'dos': proc})
@@ -50,7 +50,8 @@ async def handle_start_attack(alice_request):
 
 @dp.request_handler(state=DosStates.START_ATTACK,
                     commands=['стоп', 'хватит', 'прекрати',
-                              'остановись', 'нельзя', 'фу'])
+                              'остановись', 'нельзя', 'фу',
+                              'отмена'])
 async def handle_stop_attack(alice_request):
     user_id = alice_request.session.user_id
     data = await dp.storage.get_data(user_id)
@@ -58,8 +59,7 @@ async def handle_stop_attack(alice_request):
     proc.terminate()
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     return alice_request.response('Остановочка. Что дальше ?',
-                                  buttons=['Атаковать',
-                                           'Пинг'])
+                                  buttons=meta.action_buttons)
 
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
@@ -78,19 +78,16 @@ async def handle_start_ping(alice_request):
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     if result == 0:
         return alice_request.response('Пакетики доставлены. Что дальше ?',
-                                      buttons=['Атаковать',
-                                               'Пинг'])
+                                      buttons=meta.action_buttons)
     else:
         return alice_request.response('Пакетики не доставлены. Что дальше ?',
-                                      buttons=['Атаковать',
-                                               'Пинг'])
+                                      buttons=meta.action_buttons)
 
 
 @dp.request_handler()
 async def handle_other_commands(alice_request):
     return alice_request.response('Читай доки',
-                                  buttons=['Атаковать',
-                                           'Пинг'])
+                                  buttons=meta.action_buttons)
 
 
 if __name__ == '__main__':

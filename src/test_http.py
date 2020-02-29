@@ -1,3 +1,4 @@
+import sys
 import aiohttp
 import asyncio
 
@@ -9,8 +10,7 @@ async def bound_fetch(sem, url, session):
             await response.release()
 
 
-async def main(loop):
-    url = 'cb.skoltech.ru'
+async def main(loop, url):
     count = 100000
     tasks = []
     sem = asyncio.Semaphore(count)
@@ -23,7 +23,7 @@ async def main(loop):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
+    loop.run_until_complete(main(loop, sys.argv[1]))
 
     try:
         loop.run_forever()
