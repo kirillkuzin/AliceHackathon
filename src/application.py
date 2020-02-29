@@ -46,7 +46,7 @@ async def handle_start_attack(alice_request):
         if request_text == 'мой сервер':
             addr = 'cb.skoltech.ru'
         proc = subprocess.Popen(
-            ['python', './src/test_http.py', request_text]
+            ['python', './src/test_http.py', addr]
         )
         await dp.storage.update_data(user_id=user_id,
                                      data={'dos': proc})
