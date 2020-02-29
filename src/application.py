@@ -22,18 +22,8 @@ dp = Dispatcher(storage=MemoryStorage())
 @dp.request_handler(func=lambda areq: areq.session.new)
 async def handle_new_session(alice_request):
     user_id = alice_request.session.user_id
-    await dp.storage.set_state(user_id, UserStates.INPUT_SERVER)
-    return alice_request.response('Привет! Напиши мне свой сервер')
-
-
-@dp.request_handler(state=UserStates.INPUT_SERVER)
-async def handle_input_server(alice_request):
-    user_id = alice_request.session.user_id
-    request_text = alice_request.request.original_utterance
-    await dp.storage.update_data(user_id=user_id,
-                                 data={'server': SKOLTECH_URL})
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
-    return alice_request.response('Я запомнила. Теперь выбери что будем '
+    return alice_request.response('Привет. Выбери что будем '
                                   'делать. Я могу выполнить пинг, '
                                   'запустить Dos атаку, просканировать порты '
                                   'и сайт на уязвимость',
@@ -58,9 +48,7 @@ async def handle_start_attack(alice_request):
     print(request_text)
     addr = request_text
     if 'мой сервер' in request_text:
-        data = await dp.storage.get_data(user_id)
-        server = data['server']
-        addr = server
+        addr = SKOLTECH_URL
     result = utils.ping(addr)
     if result == 0:
         proc = subprocess.Popen(
@@ -110,9 +98,7 @@ async def handle_start_ping(alice_request):
     request_text = alice_request.request.original_utterance
     addr = request_text
     if 'мой сервер' in request_text:
-        data = await dp.storage.get_data(user_id)
-        server = data['server']
-        addr = server
+        addr = SKOLTECH_URL
     result = utils.ping(addr)
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     if result == 0:
@@ -125,7 +111,7 @@ async def handle_start_ping(alice_request):
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND)
 async def handle_other_commands(alice_request):
-    return alice_request.response('Читай доки',
+    return alice_request.response('Не знаю такого',
                                   buttons=meta.action_buttons)
 
 
