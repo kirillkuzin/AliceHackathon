@@ -13,6 +13,8 @@ WEBHOOK_URL_PATH = '/my-alice-webhook/'
 
 WEBAPP_PORT = 8080
 
+SKOLTECH_URL = 'cb.skoltech.ru'
+
 
 dp = Dispatcher(storage=MemoryStorage())
 
@@ -29,7 +31,7 @@ async def handle_input_server(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
     await dp.storage.update_data(user_id=user_id,
-                                 data={'server': request_text})
+                                 data={'server': SKOLTECH_URL})
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     return alice_request.response('Я запомнила. Теперь выбери что будем '
                                   'делать. Я могу выполнить пинг, '
