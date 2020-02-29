@@ -122,4 +122,4 @@ async def handle_other_commands(alice_request):
 
 if __name__ == '__main__':
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL_PATH)
-    web.run_app(app, host='127.0.0.1', port=WEBAPP_PORT)
+    web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
