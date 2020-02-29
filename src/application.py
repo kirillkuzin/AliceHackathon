@@ -6,6 +6,7 @@ from aioalice.dispatcher import MemoryStorage
 
 from states import UserStates, DosStates, PingStates
 import meta
+import utils
 
 
 WEBHOOK_URL_PATH = '/my-alice-webhook/'
@@ -38,14 +39,19 @@ async def handle_select_host_attack(alice_request):
 async def handle_start_attack(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
-    proc = subprocess.Popen(
-        ['python', './src/test_http.py', request_text]
-    )
-    await dp.storage.update_data(user_id=user_id,
-                                 data={'dos': proc})
-    await dp.storage.set_state(user_id, DosStates.START_ATTACK)
-    print(proc.pid)
-    return alice_request.response('Пакетики полетели')
+    result = utils.ping(request_text)
+    if result == 0:
+        proc = subprocess.Popen(
+            ['python', './src/test_http.py', request_text]
+        )
+        await dp.storage.update_data(user_id=user_id,
+                                     data={'dos': proc})
+        await dp.storage.set_state(user_id, DosStates.START_ATTACK)
+        print(proc.pid)
+        return alice_request.response('Пакетики полетели')
+    else:
+        await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
+        return alice_request.response('Невалидный хост')
 
 
 @dp.request_handler(state=DosStates.START_ATTACK,
@@ -74,7 +80,7 @@ async def handle_select_host_ping(alice_request):
 async def handle_start_ping(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
-    result = subprocess.call(['ping', '-c', '1', request_text])
+    result = utils.ping(request_text)
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     if result == 0:
         return alice_request.response('Пакетики доставлены. Что дальше ?',
@@ -92,4 +98,4 @@ async def handle_other_commands(alice_request):
 
 if __name__ == '__main__':
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL_PATH)
-    web.run_app(app, host='127.0.0.1', port=WEBAPP_PORT)
+    web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
