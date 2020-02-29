@@ -87,8 +87,15 @@ async def handle_stop_attack(alice_request):
                                   buttons=meta.action_buttons)
 
 
+@dp.request_handler(state=DosStates.START_ATTACK)
+async def handle_try_stop_attack(alice_request):
+    return alice_request.response('У тебя никогда не получится меня '
+                                  'остановить')
+
+
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
-                    contains=['пинг', 'ping', 'pink'])
+                    contains=['пинг', 'ping', 'pink',
+                              'доступен', 'доступность'])
 async def handle_select_host_ping(alice_request):
     user_id = alice_request.session.user_id
     await dp.storage.set_state(user_id, PingStates.SELECT_HOST_PING)
