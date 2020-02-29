@@ -40,11 +40,11 @@ async def handle_start_attack(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
     print(request_text)
-    result = utils.ping(request_text)
+    addr = request_text
+    if request_text == 'мой сервер':
+        addr = 'cb.skoltech.ru'
+    result = utils.ping(addr)
     if result == 0:
-        addr = request_text
-        if request_text == 'мой сервер':
-            addr = 'cb.skoltech.ru'
         proc = subprocess.Popen(
             ['python', './src/test_http.py', addr]
         )
