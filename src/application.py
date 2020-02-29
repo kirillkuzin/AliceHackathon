@@ -20,8 +20,18 @@ dp = Dispatcher(storage=MemoryStorage())
 @dp.request_handler(func=lambda areq: areq.session.new)
 async def handle_new_session(alice_request):
     user_id = alice_request.session.user_id
+    await dp.storage.set_state(user_id, UserStates.INPUT_SERVER)
+    return alice_request.response('Привет! Напиши мне свой сервер')
+
+
+@dp.request_handler(state=UserStates.INPUT_SERVER)
+async def handle_input_server(alice_request):
+    user_id = alice_request.session.user_id
+    request_text = alice_request.request.original_utterance
+    await dp.storage.update_data(user_id=user_id,
+                                 data={'server': request_text})
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
-    return alice_request.response('Привет! Что будем делать ?',
+    return alice_request.response('Я запомнила. Теперь выбери что будем делать',
                                   buttons=meta.action_buttons)
 
 
@@ -41,8 +51,8 @@ async def handle_start_attack(alice_request):
     request_text = alice_request.request.original_utterance
     print(request_text)
     addr = request_text
-    if request_text == 'мой сервер':
-        addr = 'cb.skoltech.ru'
+    if 'мой сервер' in request_text:
+        addr = dp.storage.get_data(user_id)['server']
     result = utils.ping(addr)
     if result == 0:
         proc = subprocess.Popen(
@@ -84,7 +94,10 @@ async def handle_select_host_ping(alice_request):
 async def handle_start_ping(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
-    result = utils.ping(request_text)
+    addr = request_text
+    if 'мой сервер' in request_text:
+        addr = dp.storage.get_data(user_id)['server']
+    result = utils.ping(addr)
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     if result == 0:
         return alice_request.response('Пакетики доставлены. Что дальше ?',

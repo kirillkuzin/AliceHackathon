@@ -3,7 +3,6 @@ import aiohttp
 import asyncio
 
 
-
 async def bound_fetch(sem, url, session):
     async with sem:
         async with session.get(url) as response:
