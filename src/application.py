@@ -39,8 +39,12 @@ async def handle_select_host_attack(alice_request):
 async def handle_start_attack(alice_request):
     user_id = alice_request.session.user_id
     request_text = alice_request.request.original_utterance
+    print(request_text)
     result = utils.ping(request_text)
     if result == 0:
+        addr = request_text
+        if request_text == 'мой сервер':
+            addr = 'cb.skoltech.ru'
         proc = subprocess.Popen(
             ['python', './src/test_http.py', request_text]
         )
@@ -48,7 +52,7 @@ async def handle_start_attack(alice_request):
                                      data={'dos': proc})
         await dp.storage.set_state(user_id, DosStates.START_ATTACK)
         print(proc.pid)
-        return alice_request.response('Пакетики полетели')
+        return alice_request.response('Атака на Сколтех началась')
     else:
         await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
         return alice_request.response('Невалидный хост')
@@ -90,7 +94,7 @@ async def handle_start_ping(alice_request):
                                       buttons=meta.action_buttons)
 
 
-@dp.request_handler()
+@dp.request_handler(state=UserStates.SELECT_COMMAND)
 async def handle_other_commands(alice_request):
     return alice_request.response('Читай доки',
                                   buttons=meta.action_buttons)
