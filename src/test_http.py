@@ -15,7 +15,7 @@ async def main(loop, url):
     sem = asyncio.Semaphore(count)
     async with aiohttp.ClientSession() as session:
         for i in range(count):
-            task = asyncio.ensure_future(bound_fetch(sem, "https://" + url, session))
+            task = asyncio.ensure_future(bound_fetch(sem, "http://" + url, session))
             tasks.append(task)
         await asyncio.gather(*tasks)
     print('done')

@@ -31,7 +31,7 @@ async def handle_new_session(alice_request):
 
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
-                    contains=['атаковать', 'атака', 'атакуй',
+                    contains=['атаковать', 'атака', 'атакуй', 'атаку',
                               'ddos', 'dos', 'дудос', 'ддос', 'дидос'])
 async def handle_select_host_attack(alice_request):
     user_id = alice_request.session.user_id
@@ -84,7 +84,7 @@ async def handle_try_stop_attack(alice_request):
 
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
-                    contains=['пинг', 'ping', 'pink',
+                    contains=['пинг', 'ping', 'pink', 'пинк',
                               'доступен', 'доступность'])
 async def handle_select_host_ping(alice_request):
     user_id = alice_request.session.user_id
