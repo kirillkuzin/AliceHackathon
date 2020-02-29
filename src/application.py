@@ -31,12 +31,16 @@ async def handle_input_server(alice_request):
     await dp.storage.update_data(user_id=user_id,
                                  data={'server': request_text})
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
-    return alice_request.response('Я запомнила. Теперь выбери что будем делать',
+    return alice_request.response('Я запомнила. Теперь выбери что будем '
+                                  'делать. Я могу выполнить пинг, '
+                                  'запустить Dos атаку, просканировать порты '
+                                  'и сайт на уязвимость',
                                   buttons=meta.action_buttons)
 
 
 @dp.request_handler(state=UserStates.SELECT_COMMAND,
-                    contains=['атаковать', 'атака'])
+                    contains=['атаковать', 'атака', 'атакуй',
+                              'ddos', 'dos', 'дудос', 'ддос', 'дидос'])
 async def handle_select_host_attack(alice_request):
     user_id = alice_request.session.user_id
     await dp.storage.update_data(user_id=user_id,
@@ -75,10 +79,9 @@ async def handle_start_attack(alice_request):
 async def handle_stop_attack(alice_request):
     user_id = alice_request.session.user_id
     data = await dp.storage.get_data(user_id)
-    proc = data['dos']
-    proc.terminate()
+    data['dos'].terminate()
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
-    return alice_request.response('Остановочка. Что дальше ?',
+    return alice_request.response('Сервер будет жить. Что дальше ?',
                                   buttons=meta.action_buttons)
 
 
