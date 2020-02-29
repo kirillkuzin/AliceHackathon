@@ -56,7 +56,9 @@ async def handle_start_attack(alice_request):
     print(request_text)
     addr = request_text
     if 'мой сервер' in request_text:
-        addr = dp.storage.get_data(user_id)['server']
+        data = await dp.storage.get_data(user_id)
+        server = data['server']
+        addr = server
     result = utils.ping(addr)
     if result == 0:
         proc = subprocess.Popen(
@@ -99,7 +101,9 @@ async def handle_start_ping(alice_request):
     request_text = alice_request.request.original_utterance
     addr = request_text
     if 'мой сервер' in request_text:
-        addr = dp.storage.get_data(user_id)['server']
+        data = await dp.storage.get_data(user_id)
+        server = data['server']
+        addr = server
     result = utils.ping(addr)
     await dp.storage.set_state(user_id, UserStates.SELECT_COMMAND)
     if result == 0:
@@ -118,4 +122,4 @@ async def handle_other_commands(alice_request):
 
 if __name__ == '__main__':
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL_PATH)
-    web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
+    web.run_app(app, host='127.0.0.1', port=WEBAPP_PORT)
